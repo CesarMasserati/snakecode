@@ -12,7 +12,7 @@ snakecode /var/www/html/meu-projeto # fundo = código do SEU projeto
 
 ## Instalação
 
-Os pacotes ficam em `dist/` (veja "Gerar os pacotes" abaixo).
+Os pacotes de distribuição são gerados em `dist/` pelo script abaixo. Esse diretório fica fora do repositório.
 
 | Sistema | Pacote | Como instalar |
 |---|---|---|

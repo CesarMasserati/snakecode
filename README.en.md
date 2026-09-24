@@ -11,7 +11,7 @@ snakecode /path/to/your/project     # or play over your own code
 
 ## Install
 
-Prebuilt packages are in `dist/` (see [building the packages](#building-the-packages)).
+Run the packaging script below to create the packages in `dist/`. Generated packages stay out of the Git repository.
 
 | Platform | Package | Install |
 |---|---|---|
