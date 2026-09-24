@@ -2,90 +2,134 @@
 
 [Português (Brasil)](README.md)
 
-A little Snake game hiding in a terminal IDE. It looks like an editor, complete with tabs, syntax highlighting, breadcrumbs and a status bar. The snake is right there in the cursor.
+A little Snake game hiding in a terminal IDE. The snake moves through source code: the block cursor is its head and a red linter underline is its food. Play over SnakeCode's own code or point it at another project.
+
+![SnakeCode running in a terminal with project source code in the editor](assets/snakecode-game.png)
+
+## 1. Build the packages
+
+The packaging script creates three formats: a PHAR for PHP, a Linux/macOS/WSL archive and a Windows 64-bit installer. The output goes to `dist/`, which Git ignores.
+
+To build all packages, use PHP 8.3 or newer with the `phar` and `zip` extensions enabled. The Windows package downloads the official portable PHP build and checks its published SHA-256, so the build needs internet access.
 
 ```bash
-snakecode                           # use SnakeCode's own source as the backdrop
-snakecode /path/to/your/project     # or play over your own code
+php8.3 -d phar.readonly=0 build/package.php
 ```
 
-## Install
-
-Run the packaging script below to create the packages in `dist/`. Generated packages stay out of the Git repository.
-
-| Platform | Package | Install |
-|---|---|---|
-| Windows 10/11 (x64) | `snakecode-1.0.0-windows-x64.zip` | Extract it and run `install.cmd`. PHP 8.3 is included. |
-| Linux, macOS or WSL | `snakecode-1.0.0-linux.tar.gz` | Run `tar xzf ...` and then `sh install.sh`. Installs under `~/.local`, no sudo needed. Requires PHP 8.3+ with `mbstring`. |
-| Any platform with PHP 8.3+ | `snakecode.phar` | Run `php snakecode.phar [directory]`. On Windows, PHP needs `extension=ffi` and `ffi.enable=true`. |
-
-On Windows, SnakeCode runs in Windows Terminal, PowerShell or cmd. The installer adds `snakecode` to PATH and creates a Start Menu shortcut. Git Bash and mintty are not supported. To run from source, use `php8.3 bin/snakecode` on Linux or `php bin\snakecode` on Windows.
-
-### Building the packages
+If your PHP command is named `php`, use `php` instead of `php8.3`. To build only the PHAR and Linux package, without downloading PHP for Windows, run:
 
 ```bash
-php8.3 -d phar.readonly=0 build/package.php               # phar, Linux and Windows
-php8.3 -d phar.readonly=0 build/package.php --no-windows  # skip the Windows PHP download
+php8.3 -d phar.readonly=0 build/package.php --no-windows
 ```
 
-The Windows package uses the official `nts-vs16-x64` build from windows.php.net. The build script checks its SHA-256 against the published checksum and includes only the PHP executable, required extensions and their DLL dependencies.
+When it finishes, `dist/` contains `snakecode.phar`, `snakecode-1.0.0-linux.tar.gz` and, unless you used `--no-windows`, `snakecode-1.0.0-windows-x64.zip`.
 
-## Play over your own project
+## 2. Install
 
-Pass a project directory and SnakeCode will use its source files as the editor backdrop. Tabs, breadcrumbs and the status bar show paths and languages relative to that directory.
+### Linux, macOS and WSL
 
-- In a Git repository, SnakeCode reads tracked files and new, unignored files, following `.gitignore`. Outside Git, it skips folders such as `vendor/`, `node_modules/`, `storage/`, `cache/`, `dist/`, `build/`, `coverage/` and hidden directories.
-- It reads source code in PHP, Blade, JS/TS, Vue, Svelte, HTML, CSS/SCSS, Python, Ruby, Go, Rust, Java, Kotlin, C#, C/C++, Swift, SQL and shell. It skips media, documents, lock files, JSON/YAML, minified files, bundles and files larger than 128 KB.
-- `.env*` files and files named like `secrets.php` or `credentials.js` are never shown.
-- The default is 40 files, most recently edited first. Change that with `--files=N`.
-- Files are read when their tabs open, so large projects do not slow startup.
+The package requires PHP 8.3 or newer with `mbstring` and `tokenizer`. Extract it and run the installer:
 
-## Reading the screen
+```bash
+tar -xzf dist/snakecode-1.0.0-linux.tar.gz
+cd snakecode-1.0.0-linux
+sh install.sh
+```
+
+The installer puts SnakeCode under `~/.local` and does not need sudo. If it says `~/.local/bin` is missing from `PATH`, add the line it prints to your `~/.bashrc` and open a new terminal. Then run `snakecode`.
+
+### Windows 10/11 (x64)
+
+Extract the ZIP. In the `SnakeCode` folder, double-click `install.cmd`. The package includes portable PHP 8.3, so you do not need to install PHP. The installer adds `snakecode` to your user `PATH` and creates a Start Menu shortcut. Open a new terminal and run `snakecode`.
+
+Use Windows Terminal, PowerShell or cmd. Git Bash and mintty are not supported. If SnakeCode reports that the Microsoft Visual C++ Redistributable 2015–2022 x64 is missing, install it from [Microsoft](https://aka.ms/vs/17/release/vc_redist.x64.exe).
+
+### Run the PHAR
+
+If PHP 8.3 or newer is already installed, you can run the PHAR directly without installing SnakeCode:
+
+```bash
+php dist/snakecode.phar
+```
+
+On Windows, PHP needs FFI enabled (`extension=ffi` and `ffi.enable=true`), and the game must run in Windows Terminal, PowerShell or cmd.
+
+## 3. Run from source, without an installer
+
+To run a cloned checkout, use PHP 8.3 or newer with `mbstring` and `tokenizer`. You do not need `composer install` just to play; `bootstrap.php` loads the app classes.
+
+```bash
+php8.3 bin/snakecode
+```
+
+On Windows, run this from PowerShell or cmd:
+
+```powershell
+php bin\snakecode
+```
+
+To run from source on Windows, enable FFI in `php.ini` (`extension=ffi` and `ffi.enable=true`) and use Windows Terminal, PowerShell or cmd. Git Bash and mintty are not supported.
+
+The game uses SnakeCode's own source as the backdrop. Press `q` or `Ctrl+C` to quit.
+
+## 4. Play over another project
+
+Pass the project directory as an argument. The same pattern works with an installed copy, the PHAR or the source checkout:
+
+```bash
+snakecode /path/to/my-project
+php8.3 bin/snakecode /path/to/my-project
+php dist/snakecode.phar /path/to/my-project
+```
+
+On Windows, quote paths that contain spaces:
+
+```powershell
+snakecode "C:\Users\Cesar\my project"
+php bin\snakecode "C:\Users\Cesar\my project"
+```
+
+You can choose how many files appear and how subtle the snake looks:
+
+```bash
+snakecode --files=80 --stealth=medium /path/to/my-project
+```
+
+In a Git repository, SnakeCode reads tracked files and new files that are not ignored by `.gitignore`. Outside Git, it skips `vendor/`, `node_modules/`, `storage/`, `cache/`, `dist/`, `build/`, `coverage/`, hidden directories and other dependency folders. It shows source files up to 128 KB; `.env*` and files named like `secrets.php` or `credentials.js` are skipped.
+
+By default, SnakeCode picks up to 40 source files, most recently edited first. It reads each file only when its tab opens.
+
+## Controls
+
+| Key | Action |
+|---|---|
+| Arrow keys, WASD or hjkl | Move; the first key starts the game |
+| `m` | Open the menu and pause |
+| `p` or Space | Pause ("Paused on breakpoint") |
+| `v` | Cycle through `subtle`, `medium` and `easy` |
+| `Esc` or `` ` `` | Hide the game and leave only code visible; press again to return paused |
+| `Enter` | Restart after game over |
+| `q` or Ctrl+C | Quit and restore the terminal |
+
+In the menu, use ↑ / ↓ and Enter to choose an option; ← / → change the stealth profile. Add `--no-menu` to the command line to skip the menu.
+
+## What the editor cues mean
 
 | IDE detail | In the game |
 |---|---|
 | Block cursor | Snake's head |
 | Selection behind the cursor | Snake's body |
-| Red wavy linter underline | Food |
-| `●` in the gutter and `Ln X, Col Y` in the status bar | The food's exact line and column |
-| `■ Undefined variable $food at col N` | An inline hint at the food's line |
-| `▸ ⋯ N lines` (folded region) | An obstacle, starting at level 3 |
+| Red wavy underline | Food |
+| `●` in the gutter and `Ln X, Col Y` in the status bar | Food's line and column |
+| `■ Undefined variable $food at col N` | Hint on the food's line |
+| `▸ ⋯ N lines` (folded region) | Obstacle, starting at level 3 |
 | Branch `feature/level-N` | Current level |
-| `⟳ deaths↓ score↑` and `✓ food/goal` | Scoreboard |
-| A new tab | Each turn opens another workspace file |
-| TERMINAL panel with `PHP Fatal error` | Game over, with the collision's real stack trace |
-
-## Menu and controls
-
-The game opens on a Welcome tab. The menu lets you start, choose a stealth profile, view the controls and see a live preview of the editor cues. Press `m` during a game to pause and open it; you can resume or start a new game. Use `--no-menu` to skip it.
-
-| Key | Action |
-|---|---|
-| ↑ / ↓ and Enter in the menu | Choose an option; ← / → change the stealth profile |
-| `m` | Open the menu and pause |
-| Arrow keys, WASD or hjkl | Move; the first key starts the game |
-| `p` or Space | Pause ("Paused on breakpoint") |
-| `v` | Cycle through `subtle`, `medium` and `easy` |
-| `Esc` or `` ` `` | Panic key: hide the game and leave only code visible; press again to return paused |
-| `Enter` | Restart after game over |
-| `q` or Ctrl+C | Quit and restore the terminal |
-
-## Options
-
-```text
-PROJECT_DIRECTORY              source used as the backdrop (default: SnakeCode itself)
---files=N                      number of files, 1 to 500 (default: 40)
---stealth=subtle|medium|easy   stealth profile (the last choice is saved)
---no-menu                      skip the opening menu
---seed=N                       deterministic random seed
---render-once                  print one frame and exit (no TTY required)
-```
-
-Options can go before or after the project directory, in `--name=value` form. The high score and selected profile are saved to `~/.local/state/snakecode/state.json`, with directory permissions `0700`, file permissions `0600` and atomic writes. If `kill -9` leaves the terminal in a bad state, run `reset`.
+| A new tab | Each turn opens another project file |
+| TERMINAL panel with `PHP Fatal error` | Game over, with the collision's stack trace |
 
 ## Tests
 
 ```bash
-php8.3 /usr/local/bin/composer install
-php8.3 vendor/bin/phpunit
+composer install
+composer test
 ```
