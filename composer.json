@@ -1,0 +1,41 @@
+{
+    "name": "cesar/snakecode",
+    "description": "Jogo da cobrinha no terminal disfarçado de IDE.",
+    "type": "project",
+    "license": "proprietary",
+    "bin": ["bin/snakecode"],
+    "require": {
+        "php": ">=8.3",
+        "ext-mbstring": "*",
+        "ext-tokenizer": "*"
+    },
+    "suggest": {
+        "ext-pcntl": "Linux: redimensionamento instantâneo (SIGWINCH) e restauração do terminal em SIGTERM/SIGHUP.",
+        "ext-ffi": "Windows: obrigatório para o console nativo (já habilitado no pacote Windows)."
+    },
+    "archive": {
+        "exclude": ["/build", "/dist", "/tests"]
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "SnakeCode\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SnakeCode\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "config": {
+        "sort-packages": true,
+        "platform": {
+            "php": "8.3"
+        }
+    }
+}

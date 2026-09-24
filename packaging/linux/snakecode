@@ -1,0 +1,18 @@
+#!/bin/sh
+# SnakeCode - lançador para Linux/macOS/WSL: usa o primeiro PHP >= 8.3 que tenha
+# as extensões necessárias (mbstring e tokenizer).
+# Para forçar um binário específico: SNAKECODE_PHP=/caminho/php snakecode
+SELF=$(readlink -f "$0" 2>/dev/null || echo "$0")
+DIR=$(dirname "$SELF")
+CHECK='exit(PHP_VERSION_ID >= 80300 && extension_loaded("mbstring") && extension_loaded("tokenizer") ? 0 : 1);'
+
+for candidate in "${SNAKECODE_PHP:-}" php8.5 php8.4 php8.3 php; do
+    [ -n "$candidate" ] || continue
+    if command -v "$candidate" >/dev/null 2>&1 && "$candidate" -r "$CHECK" >/dev/null 2>&1; then
+        exec "$candidate" "$DIR/snakecode.phar" "$@"
+    fi
+done
+
+echo "snakecode: nenhum PHP >= 8.3 com mbstring encontrado." >&2
+echo "Instale, por exemplo: sudo apt install php8.3-cli php8.3-mbstring" >&2
+exit 1

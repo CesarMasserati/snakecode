@@ -1,0 +1,19 @@
+SnakeCode {{VERSION}} para Linux / macOS / WSL
+============================================
+
+REQUISITOS
+  PHP >= 8.3 com mbstring (pcntl opcional e recomendado).
+  Ubuntu/Debian: sudo apt install php8.3-cli php8.3-mbstring
+
+INSTALAR (sem sudo, em ~/.local)
+  sh install.sh
+  snakecode
+  snakecode /caminho/do/projeto
+
+USAR SEM INSTALAR
+  ./snakecode /caminho/do/projeto
+
+DESINSTALAR
+  sh uninstall.sh
+
+Controles: setas/WASD/hjkl mover · p pausa · v discrição · Esc pânico · m menu · Enter reinicia · q sai

@@ -1,0 +1,26 @@
+SnakeCode {{VERSION}} para Windows (x64)
+=======================================
+
+Não precisa ter PHP instalado: o pacote traz o PHP {{PHP_VERSION}} oficial (windows.php.net)
+em modo portátil, com php.ini próprio. Ele não altera nenhum outro PHP da máquina.
+
+INSTALAR
+  Dê dois cliques em install.cmd. A instalação é só para o seu usuário e não pede administrador.
+  Depois, abra um terminal NOVO e rode:
+      snakecode
+      snakecode C:\caminho\do\projeto
+  Também é criado o atalho "SnakeCode" no Menu Iniciar.
+
+USAR SEM INSTALAR
+  Abra o Windows Terminal nesta pasta e rode:  .\snakecode.cmd C:\caminho\do\projeto
+
+DESINSTALAR
+  Dê dois cliques em uninstall.cmd, na pasta instalada (%LOCALAPPDATA%\Programs\SnakeCode).
+
+REQUISITOS
+  - Windows 10 (1809+) ou 11. Recomendado: Windows Terminal (cores e sublinhado ondulado completos).
+  - Microsoft Visual C++ Redistributable 2015-2022 x64 (já vem na maioria dos PCs).
+    Se o snakecode.cmd avisar que está faltando: https://aka.ms/vs/17/release/vc_redist.x64.exe
+  - Git Bash/mintty não é suportado. Use Windows Terminal, PowerShell ou cmd.
+
+Controles: setas/WASD mover · p pausa · v discrição · Esc pânico · m menu · Enter reinicia · q sai

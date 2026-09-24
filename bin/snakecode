@@ -1,0 +1,9 @@
+#!/usr/bin/env php8.3
+<?php
+
+/*
+ * Ponto de entrada do SnakeCode a partir do código-fonte.
+ * Windows: php bin\snakecode   ·   Linux: php8.3 bin/snakecode (ou ./bin/snakecode)
+ */
+
+require __DIR__ . '/../bootstrap.php';
