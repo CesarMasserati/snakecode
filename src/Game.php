@@ -319,8 +319,8 @@ final class Game
     private function handleSettings(Command $command): void
     {
         if ($command === Command::Panic || $command === Command::Menu) { $this->closeSettings(); return; }
-        if ($command === Command::Up) $this->settingsSelection = ($this->settingsSelection + 4) % 5;
-        elseif ($command === Command::Down) $this->settingsSelection = ($this->settingsSelection + 1) % 5;
+        if ($command === Command::Up) $this->settingsSelection = ($this->settingsSelection + 5) % 6;
+        elseif ($command === Command::Down) $this->settingsSelection = ($this->settingsSelection + 1) % 6;
         elseif ($command === Command::Confirm && $this->settingsSelection === 1) {
             $this->pathInput = $this->settings->projectPath ?? '';
             $this->mode = Mode::SettingsPath;
@@ -337,6 +337,7 @@ final class Game
                 $this->settings->snakeColor = GameSettings::COLORS[(($index + $step) % count(GameSettings::COLORS) + count(GameSettings::COLORS)) % count(GameSettings::COLORS)];
                 $this->theme = $this->theme->withSnakeColor($this->settings->snakeColor);
             }
+            elseif ($this->settingsSelection === 5) $this->settings->obstaclesEnabled = $step > 0;
             $this->persist();
         }
     }
@@ -542,7 +543,13 @@ final class Game
             max($this->rows, Renderer::MIN_ROWS),
         );
 
-        return new GameState($boardCols, $boardRows, $this->random, startLevel: $this->settings->startLevel);
+        return new GameState(
+            $boardCols,
+            $boardRows,
+            $this->random,
+            startLevel: $this->settings->startLevel,
+            obstaclesEnabled: $this->settings->obstaclesEnabled,
+        );
     }
 
     private function draw(): void

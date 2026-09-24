@@ -15,6 +15,7 @@ final class GameSettings
         public int $fileCount = 40,
         public int $turnsPerFile = 1,
         public string $snakeColor = 'green',
+        public bool $obstaclesEnabled = true,
     ) {
         $this->startLevel = max(1, min(100, $startLevel));
         $this->fileCount = max(1, min(500, $fileCount));
@@ -33,10 +34,11 @@ final class GameSettings
             is_numeric($data['file_count'] ?? null) ? (int) $data['file_count'] : 40,
             is_numeric($data['turns_per_file'] ?? null) ? (int) $data['turns_per_file'] : 1,
             is_string($data['snake_color'] ?? null) ? $data['snake_color'] : 'green',
+            ($data['obstacles_enabled'] ?? true) === true,
         );
     }
 
-    /** @return array<string, int|string|null> */
+    /** @return array<string, bool|int|string|null> */
     public function toArray(): array
     {
         return [
@@ -45,6 +47,7 @@ final class GameSettings
             'file_count' => $this->fileCount,
             'turns_per_file' => $this->turnsPerFile,
             'snake_color' => $this->snakeColor,
+            'obstacles_enabled' => $this->obstaclesEnabled,
         ];
     }
 }

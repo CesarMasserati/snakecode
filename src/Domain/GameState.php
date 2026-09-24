@@ -44,6 +44,7 @@ final class GameState
         private readonly Randomizer $random,
         private readonly LevelTable $levels = new LevelTable(),
         int $startLevel = 1,
+        private readonly bool $obstaclesEnabled = true,
     ) {
         if ($cols < 8 || $rows < 4) {
             throw new InvalidArgumentException(sprintf('Tabuleiro pequeno demais: %dx%d.', $cols, $rows));
@@ -52,7 +53,7 @@ final class GameState
         $this->cols = $cols;
         $this->rows = $rows;
         $this->spawner = new FoodSpawner($random);
-        $this->level = $levels->level($startLevel);
+        $this->level = $levels->level($startLevel, $this->obstaclesEnabled);
         $this->snake = Snake::spawn(
             new Coord(intdiv($cols, 4) + self::INITIAL_LENGTH, intdiv($rows, 2)),
             $this->direction,
@@ -155,7 +156,7 @@ final class GameState
             }
         }
 
-        if ($this->level->number === 100 && count($this->folds) < $this->level->folds) {
+        if ($this->obstaclesEnabled && $this->level->number === 100 && count($this->folds) < $this->level->folds) {
             $this->placeFolds();
         }
 
@@ -185,7 +186,7 @@ final class GameState
     private function levelUp(): void
     {
         if ($this->level->number >= 100) return;
-        $this->level = $this->levels->level($this->level->number + 1);
+        $this->level = $this->levels->level($this->level->number + 1, $this->obstaclesEnabled);
         $this->eatenInLevel = 0;
         $this->placeFolds();
     }
@@ -198,6 +199,7 @@ final class GameState
     private function placeFolds(): void
     {
         $this->folds = [];
+        if (!$this->obstaclesEnabled) return;
         $endgame = $this->level->number === 100;
         $maxLength = $endgame ? 1 : min(self::FOLD_MAX_LENGTH, intdiv($this->cols, 2));
         if ((!$endgame && $maxLength < self::FOLD_MIN_LENGTH) || (!$endgame && $this->rows < 5)) {
@@ -208,7 +210,7 @@ final class GameState
         for ($attempt = 0; count($this->folds) < $this->level->folds && $attempt < $attemptLimit; $attempt++) {
             $length = $endgame ? 1 : $this->random->getInt(self::FOLD_MIN_LENGTH, $maxLength);
             $fold = new Fold(
-                $this->random->getInt(1, $this->rows - 2),
+                $this->random->getInt($endgame ? 0 : 1, $endgame ? $this->rows - 1 : $this->rows - 2),
                 $this->random->getInt(0, $this->cols - $length),
                 $length,
                 $this->random->getInt(3, 42),
@@ -218,11 +220,20 @@ final class GameState
                 $this->folds[] = $fold;
             }
         }
+
+        if ($endgame && count($this->folds) < $this->level->folds) {
+            for ($y = 0; $y < $this->rows && count($this->folds) < $this->level->folds; $y++) {
+                for ($x = 0; $x < $this->cols && count($this->folds) < $this->level->folds; $x++) {
+                    $fold = new Fold($y, $x, 1, 3);
+                    if ($this->canPlace($fold)) $this->folds[] = $fold;
+                }
+            }
+        }
     }
 
     private function canPlace(Fold $candidate): bool
     {
-        if (abs($candidate->y - $this->snake->head()->y) <= self::SAFE_ROWS_AROUND_HEAD) {
+        if ($this->level->number !== 100 && abs($candidate->y - $this->snake->head()->y) <= self::SAFE_ROWS_AROUND_HEAD) {
             return false;
         }
 

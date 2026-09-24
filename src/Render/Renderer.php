@@ -380,6 +380,7 @@ final class Renderer
             sprintf('Arquivos no projeto: %d (1–500)', $settings->fileCount),
             sprintf('Curvas antes de trocar de arquivo: %d', $settings->turnsPerFile),
             'Cor da cobra: ' . $settings->snakeColor,
+            'Obstáculos: ' . ($settings->obstaclesEnabled ? 'Com' : 'Sem'),
         ];
         foreach ($rows as $i => $label) {
             $selected = $i === $scene->settingsSelection && $scene->mode === Mode::Settings;
@@ -391,7 +392,7 @@ final class Renderer
             $canvas->text($x, $y++, 'Caminho da pasta (Enter confirma, Esc cancela):', Theme::TAB_ACTIVE_FG);
             $canvas->text($x, $y, '> ' . $scene->pathInput, Theme::FG);
         }
-        if ($bottom - 1 > $y) $canvas->text($x, $bottom - 1, 'Nível 100: velocidade máxima; a vitória exige preencher cada célula do tabuleiro.', Theme::GUTTER_FG);
+        if ($bottom - 1 > $y) $canvas->text($x, $bottom - 1, 'Com obstáculos: progressão de velocidade mais gradual; no nível 100, 100 células de obstáculo.', Theme::GUTTER_FG);
     }
 
     private function drawStatus(Canvas $canvas, Scene $scene): void

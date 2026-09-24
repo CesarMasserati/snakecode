@@ -103,11 +103,12 @@ Por padrão, são escolhidos até 40 arquivos de código, começando pelos edita
 
 No menu inicial, escolha **Configurações** para ajustar a próxima partida:
 
-- **Nível inicial:** de 1 a 100. O nível 100 já começa na velocidade máxima.
+- **Nível inicial:** de 1 a 100. A velocidade inicial segue a curva da opção de obstáculos.
 - **Pasta do projeto:** informe o caminho de uma pasta com arquivos de código. Deixe em branco para voltar ao código do SnakeCode.
 - **Arquivos no projeto:** de 1 a 500 arquivos.
 - **Curvas antes de trocar de arquivo:** quantas curvas válidas a cobra faz antes de abrir o próximo arquivo.
 - **Cor da cobra:** verde, ciano, amarelo, magenta, vermelho ou azul.
+- **Obstáculos:** com ou sem. Com obstáculos, a velocidade aumenta gradualmente ao longo dos níveis para dar mais tempo de reação. Sem obstáculos, a curva rápida atual é mantida; no nível 100, o passo chega a 32 ms.
 
 Use ↑ / ↓ para escolher uma opção, ← / → para mudar o valor e Enter para informar a pasta. As preferências ficam salvas entre as sessões. O nível inicial vale para a próxima partida.
 
@@ -131,7 +132,7 @@ O modo pânico pausa o jogo e abre uma cópia temporária do arquivo atual para 
 
 ### Nível 100 e vitória
 
-Os níveis ficam cada vez mais rápidos e acumulam obstáculos. No nível 100, a cobra chega à velocidade máxima e há 100 obstáculos de uma célula no tabuleiro. Essas células contam como ocupadas: para vencer, a cobra precisa preencher todos os espaços restantes. A partida só termina quando cobra e obstáculos cobrem o tabuleiro inteiro.
+Com obstáculos, a velocidade diminui gradualmente do nível 1 ao 100 e os obstáculos aumentam. No nível 100 há 100 obstáculos de uma célula; a cobra precisa ocupar todos os espaços restantes para vencer. Sem obstáculos, a cobra mantém a curva rápida atual e percorre o tabuleiro livre. Em qualquer opção, só há vitória ao preencher o tabuleiro inteiro.
 
 ## O que aparece no editor
 

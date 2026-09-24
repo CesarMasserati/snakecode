@@ -103,11 +103,12 @@ By default, SnakeCode picks up to 40 source files, most recently edited first. I
 
 Choose **Settings** from the main menu to change the next game:
 
-- **Starting level:** 1 to 100. Level 100 starts at maximum speed.
+- **Starting level:** 1 to 100. The starting speed follows the obstacle setting.
 - **Project folder:** enter a path containing source files. Leave it blank to use SnakeCode's own code.
 - **Project files:** from 1 to 500.
 - **Turns before switching files:** how many valid turns happen before the next file opens.
 - **Snake color:** green, cyan, yellow, magenta, red or blue.
+- **Obstacles:** on or off. With obstacles, speed increases gradually across the levels to give you more time to react. Without them, the current fast curve stays in place; at level 100, each base step is 32 ms.
 
 Use ↑ / ↓ to select a setting, ← / → to change it, and Enter to enter a project path. Settings are saved between sessions. The starting level applies to the next game.
 
@@ -131,7 +132,7 @@ Panic mode pauses the game and opens a temporary copy of the current file for ed
 
 ### Level 100 and winning
 
-Each level gets faster and adds obstacles. At level 100, the snake reaches maximum speed and the board has 100 one-cell obstacles. Those cells count as occupied, so the snake must fill every remaining space. The game ends in victory only when the snake and obstacles cover the whole board.
+With obstacles enabled, speed ramps up gradually from level 1 to 100 as obstacles are added. Level 100 has 100 one-cell obstacles; the snake must fill every remaining space to win. With obstacles off, the snake keeps the current fast speed curve and has a clear board. In either setting, victory comes only when the whole board is full.
 
 ## What the editor cues mean
 
