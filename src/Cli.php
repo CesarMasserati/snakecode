@@ -67,6 +67,7 @@ TXT;
 
         $store = StateStore::default();
         $saved = $store->load();
+        $settings = GameSettings::fromArray(is_array($saved['settings'] ?? null) ? $saved['settings'] : []);
 
         $profile = $options['stealth'] ?? null;
         if ($profile !== null && !in_array($profile, Theme::PROFILES, true)) {
@@ -79,12 +80,17 @@ TXT;
             return self::fail('--seed precisa ser um número inteiro.');
         }
 
-        $limit = $options['files'] ?? (string) ProjectScanner::DEFAULT_LIMIT;
+        $limit = $options['files'] ?? (string) $settings->fileCount;
         if (filter_var($limit, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => self::MAX_FILES]]) === false) {
             return self::fail(sprintf('--files precisa ser um número entre 1 e %d.', self::MAX_FILES));
         }
 
-        $project = $arguments[0] ?? $options['src'] ?? null;
+        $explicitProject = $arguments[0] ?? $options['src'] ?? null;
+        $project = $explicitProject ?? $settings->projectPath;
+        if ($explicitProject === null && $project !== null && (!is_dir($project) || !is_readable($project))) {
+            $settings->projectPath = null;
+            $project = null;
+        }
         if ($project !== null) {
             $base = realpath($project);
             if ($base === false || !is_dir($base) || !is_readable($base)) {
@@ -92,7 +98,7 @@ TXT;
             }
             $base = str_replace('\\', '/', $base);
             $files = (new ProjectScanner())->scan($base, (int) $limit);
-            if ($files === []) {
+            if ($files === [] && $explicitProject !== null) {
                 return self::fail(sprintf(
                     'Nenhum arquivo de código encontrado em %s (vendor/, node_modules/, mídia e documentos são ignorados).',
                     $base,
@@ -102,6 +108,13 @@ TXT;
             $base = $root;
             $files = (new ProjectScanner())->scan($root . '/src', (int) $limit);
         }
+        if ($files === [] && $explicitProject === null) {
+            $settings->projectPath = null;
+            $base = $root;
+            $files = (new ProjectScanner())->scan($root . '/src', (int) $limit);
+        }
+        $settings->fileCount = (int) $limit;
+        if ($explicitProject !== null) $settings->projectPath = $base;
 
         $terminal = TerminalFactory::create();
 
@@ -111,11 +124,12 @@ TXT;
             new Renderer(),
             new SourceRepository($files, $base, new Highlighter()),
             $store,
-            new Theme($profile),
+            new Theme($profile, $settings->snakeColor),
             is_numeric($saved['best'] ?? null) ? (int) $saved['best'] : 0,
             $root,
             $seed === null ? null : (int) $seed,
             showMenu: !isset($options['no-menu']),
+            settings: $settings,
         );
 
         if (isset($options['render-once'])) {

@@ -43,6 +43,7 @@ final class GameState
         int $rows,
         private readonly Randomizer $random,
         private readonly LevelTable $levels = new LevelTable(),
+        int $startLevel = 1,
     ) {
         if ($cols < 8 || $rows < 4) {
             throw new InvalidArgumentException(sprintf('Tabuleiro pequeno demais: %dx%d.', $cols, $rows));
@@ -51,7 +52,7 @@ final class GameState
         $this->cols = $cols;
         $this->rows = $rows;
         $this->spawner = new FoodSpawner($random);
-        $this->level = $levels->level(1);
+        $this->level = $levels->level($startLevel);
         $this->snake = Snake::spawn(
             new Coord(intdiv($cols, 4) + self::INITIAL_LENGTH, intdiv($rows, 2)),
             $this->direction,
@@ -69,6 +70,23 @@ final class GameState
     public function rows(): int
     {
         return $this->rows;
+    }
+
+    public function fillsBoard(): bool
+    {
+        return $this->snake->length() + $this->foldedCellCount() >= $this->cols * $this->rows;
+    }
+
+    public function foldedCellCount(): int
+    {
+        $cells = [];
+        foreach ($this->folds as $fold) {
+            for ($x = $fold->x; $x < $fold->x + $fold->length; $x++) {
+                $cells[$fold->y . ':' . $x] = true;
+            }
+        }
+
+        return count($cells);
     }
 
     /**
@@ -105,9 +123,11 @@ final class GameState
         if ($ate) {
             $this->score += self::POINTS_PER_FOOD * $this->level->number;
             $this->eatenInLevel++;
-            if ($this->eatenInLevel >= $this->level->foodsToNext) {
+            if ($this->eatenInLevel >= $this->level->foodsToNext && $this->level->number < 100) {
                 $this->levelUp();
                 $levelUp = true;
+            } elseif ($this->level->number === 100) {
+                $this->eatenInLevel = $this->level->foodsToNext;
             }
             $this->placeFood();
         }
@@ -135,6 +155,10 @@ final class GameState
             }
         }
 
+        if ($this->level->number === 100 && count($this->folds) < $this->level->folds) {
+            $this->placeFolds();
+        }
+
         if ($this->food === null || !$this->food->within($cols, $rows)) {
             $this->placeFood();
         }
@@ -160,6 +184,7 @@ final class GameState
 
     private function levelUp(): void
     {
+        if ($this->level->number >= 100) return;
         $this->level = $this->levels->level($this->level->number + 1);
         $this->eatenInLevel = 0;
         $this->placeFolds();
@@ -173,13 +198,15 @@ final class GameState
     private function placeFolds(): void
     {
         $this->folds = [];
-        $maxLength = min(self::FOLD_MAX_LENGTH, intdiv($this->cols, 2));
-        if ($maxLength < self::FOLD_MIN_LENGTH || $this->rows < 5) {
+        $endgame = $this->level->number === 100;
+        $maxLength = $endgame ? 1 : min(self::FOLD_MAX_LENGTH, intdiv($this->cols, 2));
+        if ((!$endgame && $maxLength < self::FOLD_MIN_LENGTH) || (!$endgame && $this->rows < 5)) {
             return;
         }
 
-        for ($attempt = 0; count($this->folds) < $this->level->folds && $attempt < self::FOLD_ATTEMPTS; $attempt++) {
-            $length = $this->random->getInt(self::FOLD_MIN_LENGTH, $maxLength);
+        $attemptLimit = $endgame ? 5_000 : self::FOLD_ATTEMPTS;
+        for ($attempt = 0; count($this->folds) < $this->level->folds && $attempt < $attemptLimit; $attempt++) {
+            $length = $endgame ? 1 : $this->random->getInt(self::FOLD_MIN_LENGTH, $maxLength);
             $fold = new Fold(
                 $this->random->getInt(1, $this->rows - 2),
                 $this->random->getInt(0, $this->cols - $length),
@@ -200,7 +227,12 @@ final class GameState
         }
 
         foreach ($this->folds as $fold) {
-            if (abs($fold->y - $candidate->y) < 2) {
+            if ($this->level->number !== 100 && abs($fold->y - $candidate->y) < 2) {
+                return false;
+            }
+            if ($fold->y === $candidate->y
+                && $candidate->x < $fold->x + $fold->length
+                && $fold->x < $candidate->x + $candidate->length) {
                 return false;
             }
         }

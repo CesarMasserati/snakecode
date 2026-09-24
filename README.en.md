@@ -99,6 +99,18 @@ In a Git repository, SnakeCode reads tracked files and new files that are not ig
 
 By default, SnakeCode picks up to 40 source files, most recently edited first. It reads each file only when its tab opens.
 
+## Menu and settings
+
+Choose **Settings** from the main menu to change the next game:
+
+- **Starting level:** 1 to 100. Level 100 starts at maximum speed.
+- **Project folder:** enter a path containing source files. Leave it blank to use SnakeCode's own code.
+- **Project files:** from 1 to 500.
+- **Turns before switching files:** how many valid turns happen before the next file opens.
+- **Snake color:** green, cyan, yellow, magenta, red or blue.
+
+Use ↑ / ↓ to select a setting, ← / → to change it, and Enter to enter a project path. Settings are saved between sessions. The starting level applies to the next game.
+
 ## Controls
 
 | Key | Action |
@@ -107,11 +119,19 @@ By default, SnakeCode picks up to 40 source files, most recently edited first. I
 | `m` | Open the menu and pause |
 | `p` or Space | Pause ("Paused on breakpoint") |
 | `v` | Cycle through `subtle`, `medium` and `easy` |
-| `Esc` or `` ` `` | Hide the game and leave only code visible; press again to return paused |
-| `Enter` | Restart after game over |
+| `Esc` or `` ` `` | Open the panic editor; press Esc again to return paused |
+| `Enter` | Start/restart from the menu or after game over |
 | `q` or Ctrl+C | Quit and restore the terminal |
 
 In the menu, use ↑ / ↓ and Enter to choose an option; ← / → change the stealth profile. Add `--no-menu` to the command line to skip the menu.
+
+### Panic editor
+
+Panic mode pauses the game and opens a temporary copy of the current file for editing. Type, delete, use the arrow keys, Home and End; syntax highlighting stays on. The changes are only for show and are never written to disk. Press Esc to discard them and return to the game.
+
+### Level 100 and winning
+
+Each level gets faster and adds obstacles. At level 100, the snake reaches maximum speed and the board has 100 one-cell obstacles. Those cells count as occupied, so the snake must fill every remaining space. The game ends in victory only when the snake and obstacles cover the whole board.
 
 ## What the editor cues mean
 

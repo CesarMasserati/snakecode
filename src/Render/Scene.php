@@ -37,6 +37,11 @@ final readonly class Scene
         public ?StartMenu $menu = null,
         public string $workspace = '',
         public int $fileCount = 0,
+        public ?\SnakeCode\Editor\PanicEditor $editor = null,
+        public ?\SnakeCode\GameSettings $settings = null,
+        public string $pathInput = '',
+        public int $settingsSelection = 0,
+        public int $startColumn = 0,
     ) {
     }
 

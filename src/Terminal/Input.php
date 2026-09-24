@@ -25,6 +25,12 @@ final class Input
         return self::parse($this->terminal->read($timeoutUs));
     }
 
+    /** Retorna bytes sem traduzir, para os modos de edição e configuração. */
+    public function readRaw(int $timeoutUs): string
+    {
+        return $this->terminal->read($timeoutUs);
+    }
+
     /**
      * @return list<Command>
      */
@@ -72,6 +78,7 @@ final class Input
                 'p', 'P', ' ' => Command::Pause,
                 'v', 'V' => Command::Stealth,
                 'm', 'M' => Command::Menu,
+                'c', 'C' => Command::Settings,
                 '`' => Command::Panic,
                 'q', 'Q', "\x03" => Command::Quit,
                 "\r", "\n" => Command::Confirm,

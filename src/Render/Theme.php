@@ -15,6 +15,7 @@ use InvalidArgumentException;
  */
 final readonly class Theme
 {
+    public string $snakeColor;
     public const FG = 252;
     public const BG = 234;
     public const LINE_HIGHLIGHT = 235;
@@ -43,6 +44,7 @@ final readonly class Theme
     public const KEY_FG = 244;
 
     public const PROFILES = ['subtle', 'medium', 'easy'];
+    public const COLORS = ['green', 'cyan', 'yellow', 'magenta', 'red', 'blue'];
 
     /** @var array<string, array{body_bg: int, body_fg: int|null, head_bg: int, head_fg: int, food_fg: int|null, food_char: string|null}> */
     private const STYLES = [
@@ -53,10 +55,13 @@ final readonly class Theme
 
     public function __construct(
         public string $profile = 'subtle',
+        string $snakeColor = 'green',
     ) {
         if (!in_array($profile, self::PROFILES, true)) {
             throw new InvalidArgumentException(sprintf('Perfil de discrição desconhecido: %s', $profile));
         }
+        if (!in_array($snakeColor, self::COLORS, true)) $snakeColor = 'green';
+        $this->snakeColor = $snakeColor;
     }
 
     public function next(): self
@@ -72,12 +77,17 @@ final readonly class Theme
         $count = count(self::PROFILES);
         $index = (int) array_search($this->profile, self::PROFILES, true);
 
-        return new self(self::PROFILES[(($index + $step) % $count + $count) % $count]);
+        return new self(self::PROFILES[(($index + $step) % $count + $count) % $count], $this->snakeColor);
+    }
+
+    public function withSnakeColor(string $color): self
+    {
+        return new self($this->profile, $color);
     }
 
     public function bodyBg(): int
     {
-        return self::STYLES[$this->profile]['body_bg'];
+        return $this->colorStyle()[0];
     }
 
     public function bodyFg(): ?int
@@ -87,7 +97,7 @@ final readonly class Theme
 
     public function headBg(): int
     {
-        return self::STYLES[$this->profile]['head_bg'];
+        return $this->colorStyle()[1];
     }
 
     public function headFg(): int
@@ -103,5 +113,27 @@ final readonly class Theme
     public function foodChar(): ?string
     {
         return self::STYLES[$this->profile]['food_char'];
+    }
+
+    /** @return array{0:int,1:int} corpo e cabeça */
+    private function colorStyle(): array
+    {
+        if ($this->snakeColor === 'green') {
+            return match ($this->profile) {
+                'subtle' => [236, 250],
+                'medium' => [24, 252],
+                default => [28, 46],
+            };
+        }
+        $pairs = [
+            'green' => [28, 46, 22, 28], 'cyan' => [30, 51, 23, 30],
+            'yellow' => [142, 226, 58, 142], 'magenta' => [90, 201, 53, 90],
+            'red' => [160, 196, 52, 160], 'blue' => [25, 39, 18, 25],
+        ];
+        [$body, $head, $subtle, $subtleHead] = $pairs[$this->snakeColor];
+        if ($this->profile === 'subtle') return [$subtle, $subtleHead];
+        if ($this->profile === 'medium') return [$body, 252];
+
+        return [$body, $head];
     }
 }

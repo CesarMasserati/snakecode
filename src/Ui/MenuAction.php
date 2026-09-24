@@ -12,5 +12,6 @@ enum MenuAction
     case Resume;
     case NewGame;
     case Stealth;
+    case Settings;
     case Quit;
 }

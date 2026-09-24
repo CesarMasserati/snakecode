@@ -19,4 +19,5 @@ enum Command
     case Quit;
     case Confirm;
     case Menu;
+    case Settings;
 }

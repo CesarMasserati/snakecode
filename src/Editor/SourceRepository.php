@@ -70,6 +70,25 @@ final class SourceRepository
         return count($this->files);
     }
 
+    public function currentPath(): string
+    {
+        return $this->files[$this->index];
+    }
+
+    public function code(): string
+    {
+        $code = @file_get_contents($this->currentPath());
+
+        return $code === false ? '' : $code;
+    }
+
+    public function refreshCurrent(string $code): void
+    {
+        $path = $this->currentPath();
+        $language = Language::fromPath($path) ?? Language::Php;
+        $this->cache[$path] = $this->highlighter->highlight($code, $language);
+    }
+
     /**
      * @return list<string> caminhos relativos, aba ativa primeiro
      */

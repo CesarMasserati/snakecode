@@ -24,8 +24,8 @@ final class StartMenu
         private readonly bool $hasPlayed = false,
     ) {
         $this->items = $canResume
-            ? [MenuAction::Resume, MenuAction::NewGame, MenuAction::Stealth, MenuAction::Quit]
-            : [MenuAction::NewGame, MenuAction::Stealth, MenuAction::Quit];
+            ? [MenuAction::Resume, MenuAction::NewGame, MenuAction::Stealth, MenuAction::Settings, MenuAction::Quit]
+            : [MenuAction::NewGame, MenuAction::Stealth, MenuAction::Settings, MenuAction::Quit];
     }
 
     /**
@@ -67,6 +67,7 @@ final class StartMenu
             MenuAction::Resume => 'Continuar partida',
             MenuAction::NewGame => $this->hasPlayed ? 'Nova partida' : 'Iniciar',
             MenuAction::Stealth => sprintf('Discrição: ◀ %s ▶', $theme->profile),
+            MenuAction::Settings => 'Configurações',
             MenuAction::Quit => 'Sair',
         };
     }
@@ -80,6 +81,7 @@ final class StartMenu
             MenuAction::Resume => 'm',
             MenuAction::NewGame => '',
             MenuAction::Stealth => 'v',
+            MenuAction::Settings => 'c',
             MenuAction::Quit => 'q',
         };
     }

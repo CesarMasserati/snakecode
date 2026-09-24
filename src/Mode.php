@@ -16,6 +16,10 @@ enum Mode
     case Running;
     /** Tecla de pânico: congela o jogo e exibe apenas código. */
     case Panic;
+    case Settings;
+    case SettingsPath;
     /** Game over: painel TERMINAL com o stack trace da colisão. */
     case Crashed;
+    /** Vitória só acontece quando o nível 100 ocupa todo o tabuleiro. */
+    case Won;
 }

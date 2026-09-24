@@ -72,12 +72,15 @@ final class Renderer
         $this->drawBreadcrumb($canvas, $scene);
         if ($scene->mode === Mode::Menu) {
             $this->drawMenu($canvas, $scene);
+        } elseif ($scene->mode === Mode::Settings || $scene->mode === Mode::SettingsPath) {
+            $this->drawSettings($canvas, $scene);
         } else {
             $this->drawEditor($canvas, $scene);
         }
         if ($scene->mode === Mode::Crashed && $scene->crash !== null) {
             $this->drawPanel($canvas, $scene);
         }
+        if ($scene->mode === Mode::Won) $this->drawWon($canvas);
         $this->drawStatus($canvas, $scene);
 
         return $canvas;
@@ -123,7 +126,9 @@ final class Renderer
         }
 
         // Como numa IDE, o breadcrumb acompanha o cursor (a cabeça da cobra).
-        $cursorRow = $scene->showsGame() ? $scene->state->snake->head()->y : 0;
+        $cursorRow = $scene->mode === Mode::Panic && $scene->editor !== null
+            ? $scene->editor->row() - $scene->startLine
+            : ($scene->showsGame() ? $scene->state->snake->head()->y : 0);
         $symbol = $scene->file->symbolAt($scene->startLine + $cursorRow + 1);
         $text = ' ' . implode(' › ', explode('/', $scene->path)) . ($symbol !== null ? ' › ' . $symbol : '');
 
@@ -152,9 +157,9 @@ final class Renderer
             }
 
             [$chars, $colors] = $scene->file->lines[$lineIndex] ?? [[], []];
-            $visible = min(count($chars), $boardCols);
+            $visible = min(max(0, count($chars) - $scene->startColumn), $boardCols);
             for ($x = 0; $x < $visible; $x++) {
-                $canvas->put(self::GUTTER + $x, $screenY, $chars[$x], $colors[$x]);
+                $canvas->put(self::GUTTER + $x, $screenY, $chars[$x + $scene->startColumn], $colors[$x + $scene->startColumn]);
             }
 
             if ($isFoodRow) {
@@ -172,6 +177,19 @@ final class Renderer
         }
 
         if (!$showGame) {
+            if ($scene->mode === Mode::Panic && $scene->editor !== null) {
+                $editor = $scene->editor;
+                $cursorY = $editor->row() - $scene->startLine;
+                if ($cursorY >= 0 && $cursorY < $boardRows) {
+                    $x = self::GUTTER + min(max(0, $editor->column() - $scene->startColumn), $boardCols - 1);
+                    $screenY = self::EDITOR_TOP + $cursorY;
+                    [$chars, $colors] = $scene->file->lines[$editor->row()] ?? [[], []];
+                    $index = $editor->column();
+                    $character = $chars[$index] ?? ' ';
+                    $color = $colors[$index] ?? Theme::FG;
+                    $canvas->put($x, $screenY, $character, Theme::BG, $color, Canvas::BOLD);
+                }
+            }
             return;
         }
 
@@ -335,11 +353,63 @@ final class Renderer
         }
     }
 
+    private function drawWon(Canvas $canvas): void
+    {
+        $text = 'VOCÊ VENCEU — tela completa no nível 100!';
+        $hint = 'Enter: nova partida   ·   m: menu   ·   q: sair';
+        $y = intdiv($canvas->height, 2);
+        $canvas->fillRow($y, Theme::MENU_SELECTED_BG);
+        $canvas->text(max(1, intdiv($canvas->width - mb_strlen($text), 2)), $y, $text, Theme::TAB_ACTIVE_FG, Theme::MENU_SELECTED_BG, Canvas::BOLD);
+        if ($y + 1 < $canvas->height - 1) $canvas->text(max(1, intdiv($canvas->width - mb_strlen($hint), 2)), $y + 1, $hint, Theme::FG);
+    }
+
+    private function drawSettings(Canvas $canvas, Scene $scene): void
+    {
+        [, $boardRows] = self::boardSize($scene->cols, $scene->rows);
+        $bottom = self::EDITOR_TOP + $boardRows;
+        for ($y = self::EDITOR_TOP; $y < $bottom; $y++) $canvas->fillRow($y, Theme::BG);
+        $settings = $scene->settings;
+        if ($settings === null) return;
+        $x = 3; $y = self::EDITOR_TOP + 1;
+        $canvas->text($x, $y++, 'Configurações', Theme::TAB_ACTIVE_FG, Theme::BG, Canvas::BOLD);
+        $canvas->text($x, $y++, 'Use ←/→ para ajustar · Enter para editar a pasta · Esc para voltar', Theme::BREADCRUMB_FG);
+        $y++;
+        $rows = [
+            sprintf('Nível inicial: %d (1–100)', $settings->startLevel),
+            'Pasta do projeto: ' . ($settings->projectPath ?? '(código do SnakeCode)'),
+            sprintf('Arquivos no projeto: %d (1–500)', $settings->fileCount),
+            sprintf('Curvas antes de trocar de arquivo: %d', $settings->turnsPerFile),
+            'Cor da cobra: ' . $settings->snakeColor,
+        ];
+        foreach ($rows as $i => $label) {
+            $selected = $i === $scene->settingsSelection && $scene->mode === Mode::Settings;
+            $bg = $selected ? Theme::MENU_SELECTED_BG : Theme::BG;
+            $canvas->text($x, $y++, ($selected ? '▶ ' : '  ') . $label, $selected ? Theme::TAB_ACTIVE_FG : Theme::FG, $bg);
+        }
+        $y++;
+        if ($scene->mode === Mode::SettingsPath) {
+            $canvas->text($x, $y++, 'Caminho da pasta (Enter confirma, Esc cancela):', Theme::TAB_ACTIVE_FG);
+            $canvas->text($x, $y, '> ' . $scene->pathInput, Theme::FG);
+        }
+        if ($bottom - 1 > $y) $canvas->text($x, $bottom - 1, 'Nível 100: velocidade máxima; a vitória exige preencher cada célula do tabuleiro.', Theme::GUTTER_FG);
+    }
+
     private function drawStatus(Canvas $canvas, Scene $scene): void
     {
         $y = $scene->rows - 1;
         $bg = $scene->mode === Mode::Paused ? Theme::STATUS_DEBUG_BG : Theme::STATUS_BG;
         $canvas->fillRow($y, $bg, Theme::STATUS_FG);
+
+        if ($scene->mode === Mode::Panic && $scene->editor !== null) {
+            $editor = $scene->editor;
+            $status = sprintf(' EDITOR  Ln %d, Col %d  %s  Esc descarta e volta', $editor->row() + 1, $editor->column() + 1, $editor->dirty() ? '● rascunho' : 'sem alterações');
+            $canvas->text(0, $y, mb_substr($status, 0, $scene->cols), Theme::STATUS_FG, $bg);
+            return;
+        }
+        if ($scene->mode === Mode::Settings || $scene->mode === Mode::SettingsPath) {
+            $canvas->text(0, $y, mb_substr(' CONFIGURAÇÕES  ←/→ ajusta · Enter edita caminho · Esc volta ', 0, $scene->cols), Theme::STATUS_FG, $bg);
+            return;
+        }
 
         $state = $scene->state;
         $showGame = $scene->showsGame();

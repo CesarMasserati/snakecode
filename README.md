@@ -99,6 +99,18 @@ Em um repositório Git, o SnakeCode usa arquivos versionados e arquivos novos qu
 
 Por padrão, são escolhidos até 40 arquivos de código, começando pelos editados mais recentemente. Eles só são lidos quando a aba correspondente abre.
 
+## Menu e configurações
+
+No menu inicial, escolha **Configurações** para ajustar a próxima partida:
+
+- **Nível inicial:** de 1 a 100. O nível 100 já começa na velocidade máxima.
+- **Pasta do projeto:** informe o caminho de uma pasta com arquivos de código. Deixe em branco para voltar ao código do SnakeCode.
+- **Arquivos no projeto:** de 1 a 500 arquivos.
+- **Curvas antes de trocar de arquivo:** quantas curvas válidas a cobra faz antes de abrir o próximo arquivo.
+- **Cor da cobra:** verde, ciano, amarelo, magenta, vermelho ou azul.
+
+Use ↑ / ↓ para escolher uma opção, ← / → para mudar o valor e Enter para informar a pasta. As preferências ficam salvas entre as sessões. O nível inicial vale para a próxima partida.
+
 ## Controles
 
 | Tecla | Ação |
@@ -107,11 +119,19 @@ Por padrão, são escolhidos até 40 arquivos de código, começando pelos edita
 | `m` | abrir o menu e pausar |
 | `p` ou espaço | pausar ("Paused on breakpoint") |
 | `v` | alternar a discrição: `subtle`, `medium` ou `easy` |
-| `Esc` ou `` ` `` | esconder o jogo e deixar só o código na tela; pressione de novo para voltar pausado |
-| `Enter` | reiniciar depois do game over |
+| `Esc` ou `` ` `` | abrir o editor em modo pânico; pressione Esc de novo para voltar pausado |
+| `Enter` | iniciar/reiniciar no menu ou depois do game over |
 | `q` / Ctrl+C | sair e restaurar o terminal |
 
 No menu, use ↑ / ↓ e Enter para escolher uma opção; ← / → trocam o perfil de discrição. Passe `--no-menu` na linha de comando para pular o menu.
+
+### Editor em modo pânico
+
+O modo pânico pausa o jogo e abre uma cópia temporária do arquivo atual para edição. Você pode digitar, apagar, usar as setas, Home e End; o código continua com destaque de sintaxe. As mudanças servem só para a encenação e nunca são gravadas. Pressione Esc para descartá-las e voltar ao jogo.
+
+### Nível 100 e vitória
+
+Os níveis ficam cada vez mais rápidos e acumulam obstáculos. No nível 100, a cobra chega à velocidade máxima e há 100 obstáculos de uma célula no tabuleiro. Essas células contam como ocupadas: para vencer, a cobra precisa preencher todos os espaços restantes. A partida só termina quando cobra e obstáculos cobrem o tabuleiro inteiro.
 
 ## O que aparece no editor
 
